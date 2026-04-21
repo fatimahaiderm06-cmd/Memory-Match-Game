@@ -1,104 +1,29 @@
-<div>Time: <span id="time">0</span>s</div>
-            <div>Attempts: <span id="flips">0</span></div>
-        </div>
-        <div class="grid" id="grid"></div>
-    </div>
-
-    <script>
-        const data = {
-            langs: [
-                { name: 'Python', hint: 'Simple syntax, used for AI' },
-                { name: 'C++', hint: 'Fast, used for system software' },
-                { name: 'JavaScript', hint: 'Makes websites interactive' },
-                { name: 'SQL', hint: 'Used to manage databases' },
-                { name: 'Java', hint: 'Write once, run anywhere' },
-                { name: 'Swift', hint: 'The language for iPhone apps' },
-                { name: 'HTML', hint: 'The structure of every webpage' },
-                { name: 'CSS', hint: 'Adds style and colors to web' }
-            ],
-            parts: [
-                { name: 'CPU', hint: 'The brain of the computer' },
-                { name: 'RAM', hint: 'Short-term memory for speed' },
-                { name: 'GPU', hint: 'Handles graphics and gaming' },
-                { name: 'Monitor', hint: 'The screen that shows images' },
-                { name: 'Keyboard', hint: 'Input device for typing text' },
-                { name: 'Hard Drive', hint: 'Permanent storage for files' },
-                { name: 'Motherboard', hint: 'Connects all parts together' },
-                { name: 'Mouse', hint: 'Used to click and point' }
-            ]
-        };
-
-        let currentMode = 'langs';
-        let flippedCards = [];
-        let matchedCount = 0;
-        let attempts = 0;
-        let seconds = 0;
-        let timer;
-
-        function startGame(mode) {
-            currentMode = mode;
-            // Update UI
-            document.getElementById('game-title').innerText = mode === 'langs' ? 'Programming Languages' : 'Computer Parts';
-            document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            
+event.target.classList.add('active');
             resetGame();
         }
-
         function resetGame() {
-            clearInterval(timer);
-            seconds = 0;
-            attempts = 0;
-            matchedCount = 0;
-            flippedCards = [];
+            clearInterval(timer); seconds = 0; attempts = 0; matched = 0; flipped = [];
             document.getElementById('time').innerText = '0';
             document.getElementById('flips').innerText = '0';
-            
-            const grid = document.getElementById('grid');
-            grid.innerHTML = '';
-            
-            let gameData = [...data[currentMode], ...data[currentMode]];
-            gameData.sort(() => Math.random() - 0.5);
-
+            const grid = document.getElementById('grid'); grid.innerHTML = '';
+            let gameData = [...data[currentMode], ...data[currentMode]].sort(() => Math.random() - 0.5);
             gameData.forEach(item => {
-                const card = document.createElement('div');
-                card.classList.add('card');
-                card.innerHTML = `
-                    <div class="card-back" data-hint="Hint: ${item.hint}">?</div>
-                    <div class="card-front">${item.name}</div>
-                `;
-                card.onclick = () => flipCard(card, item.name);
+                const card = document.createElement('div'); card.classList.add('card');
+                card.innerHTML = <div class="card-back" data-hint="${item.hint}">?</div><div class="card-front">${item.name}</div>;
+                card.onclick = () => {
+                    if (flipped.length < 2 && !card.classList.contains('flipped')) {
+                        card.classList.add('flipped'); flipped.push({card, name: item.name});
+                        if (flipped.length === 2) {
+                            attempts++; document.getElementById('flips').innerText = attempts;
+                            if (flipped[0].name === flipped[1].name) { matched++; flipped = []; if(matched === 8) alert('Win!'); }
+                            else { setTimeout(() => { flipped.forEach(c => c.card.classList.remove('flipped')); flipped = []; }, 800); }
+                        }
+                    }
+                };
                 grid.appendChild(card);
             });
-
-            timer = setInterval(() => {
-                seconds++;
-                document.getElementById('time').innerText = seconds;
-            }, 1000);
+            timer = setInterval(() => { seconds++; document.getElementById('time').innerText = seconds; }, 1000);
         }
-
-        function flipCard(card, name) {
-            if (flippedCards.length < 2 && !card.classList.contains('flipped')) {
-                card.classList.add('flipped');
-                flippedCards.push({ card, name });
-
-                if (flippedCards.length === 2) {
-                    attempts++;
-                    document.getElementById('flips').innerText = attempts;
-                    if (flippedCards[0].name === flippedCards[1].name) {
-                        matchedCount++;
-                        flippedCards = [];
-                        if (matchedCount === 8) alert('Excellent! Task Completed!');
-                    } else {
-                        setTimeout(() => {
-                            flippedCards.forEach(c => c.card.classList.remove('flipped'));
-                            flippedCards = [];
-                        }, 1000);
-                      }
-                }
-            }
-        }
-
         startGame('langs');
     </script>
 </body>
